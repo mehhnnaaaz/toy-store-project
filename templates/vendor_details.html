@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Toy Store HQ - Vendor Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #2B124C 0%, #522B5B 100%);
+            color: white;
+            padding: 24px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+        }
+
+        .sidebar h2 {
+            padding: 0 24px 32px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+            padding: 0 16px;
+        }
+
+        .nav-item a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .nav-btn {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            padding: 12px 16px;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-btn.active {
+            background: rgba(255,255,255,0.15);
+            border-left: 3px solid #fbbf24;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 32px;
+            background: #f8fafc;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .add-btn {
+            background: #6366f1;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 24px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-btn:hover {
+            background: #5b52f3;
+            transform: translateY(-1px);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        th {
+            background: #f8fafc;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            font-size: 14px;
+            color: #374151;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        td[contenteditable="true"] {
+            cursor: text;
+        }
+
+        td[contenteditable="true"]:focus {
+            background: #f0f9ff;
+            outline: 2px solid #3b82f6;
+            outline-offset: -2px;
+            border-radius: 4px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .save-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 1000;
+            width: 480px;
+            max-width: 90vw;
+        }
+
+        .popup h3 {
+            margin-bottom: 24px;
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .popup input, .popup select {
+            width: 100%;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .popup input:focus, .popup select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .popup button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .success-message {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+            border-left: 4px solid #16a34a;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .mobile-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px;
+                background: white;
+                border-bottom: 1px solid #e2e8f0;
+                margin: -16px -16px 24px -16px;
+            }
+
+            .menu-toggle {
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #374151;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-overlay" id="popupOverlay"></div>
+    
+    <div class="sidebar">
+        <h2>🧸 Toy Store HQ</h2>
+        
+        <div class="nav-item">
+            <a href="/admin">
+                <button class="nav-btn">
+                    📊 Overview
+                </button>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/daily_sales_log">
+                <button class="nav-btn">
+                    💳 Daily Sales Log
+                </button>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/staff_record">
+                <button class="nav-btn">
+                    👥 Staff Records
+                </button>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/monthly_tracker">
+                <button class="nav-btn">
+                    📅 Monthly Tracker
+                </button>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/vendor_details">
+                <button class="nav-btn active">
+                    🏪 Vendor Details
+                </button>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <h2>🧸 Toy Store HQ</h2>
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        </div>
+
+        <div class="page-header">
+            <h1 class="page-title">🏪 Vendor Details</h1>
+            <p class="page-subtitle">Manage vendor purchases and supplier transactions</p>
+        </div>
+
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+        
+        <button class="add-btn" onclick="openVendorPopup()">
+            🏪 Add New Purchase
+        </button>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Item</th>
+                        <th>Amount</th>
+                        <th>Vendor ID</th>
+                        <th>Mode</th>
+                        <th>Transaction ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vendor in vendors %}
+                    <tr data-id="{{ vendor[0] }}">
+                        <td contenteditable="true">{{ vendor[1] }}</td>
+                        <td contenteditable="true">{{ vendor[2] }}</td>
+                        <td contenteditable="true">{{ vendor[3] }}</td>
+                        <td contenteditable="true">₹{{ vendor[4] }}</td>
+                        <td contenteditable="true">{{ vendor[5] }}</td>
+                        <td contenteditable="true">{{ vendor[6] }}</td>
+                        <td contenteditable="true">{{ vendor[7] }}</td>
+                        <td>
+                            <button class="action-btn save-btn" onclick="saveVendor(this)">💾 Save</button>
+                            <button class="action-btn delete-btn" onclick="deleteVendor({{ vendor[0] }})">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Vendor Popup -->
+    <div class="popup" id="vendorPopup">
+        <h3>Add New Purchase</h3>
+        <form id="vendorForm" action="/add_vendor" method="POST">
+            <input type="date" name="date" required>
+            <input type="text" name="name" placeholder="Vendor Name" required>
+            <input type="text" name="item" placeholder="Item Purchased" required>
+            <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+            <select name="mode_of_transaction" required>
+                <option value="">Payment Mode</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="UPI">UPI</option>
+                <option value="Net Banking">Net Banking</option>
+                <option value="Cheque">Cheque</option>
+            </select>
+            <div class="button-group">
+                <button type="submit" style="background: #6366f1; color: white;">📋 Add Purchase</button>
+                <button type="button" onclick="closeVendorPopup()" style="background: #6b7280; color: white;">❌ Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('active');
+    }
+
+    function openVendorPopup() {
+        document.getElementById('vendorPopup').style.display = 'block';
+        document.getElementById('popupOverlay').style.display = 'block';
+    }
+
+    function closeVendorPopup() {
+        document.getElementById('vendorPopup').style.display = 'none';
+        document.getElementById('popupOverlay').style.display = 'none';
+        document.getElementById('vendorForm').reset();
+    }
+
+    function showMessage(message, isError = false) {
+        const successEl = document.getElementById('successMessage');
+        const errorEl = document.getElementById('errorMessage');
+        
+        if (isError) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            successEl.style.display = 'none';
+        } else {
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            errorEl.style.display = 'none';
+        }
+        
+        setTimeout(() => {
+            successEl.style.display = 'none';
+            errorEl.style.display = 'none';
+        }, 5000);
+    }
+
+    async function deleteVendor(vendorId) {
+        if (confirm('Are you sure you want to delete this purchase?')) {
+            try {
+                const response = await fetch('/delete_vendor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({'id': vendorId})
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    throw new Error('Delete failed');
+                }
+            } catch (error) {
+                showMessage('❌ Failed to delete purchase', true);
+            }
+        }
+    }
+
+    async function saveVendor(button) {
+        const row = button.closest('tr');
+        const id = row.dataset.id;
+        const cells = row.querySelectorAll('td[contenteditable="true"]');
+        
+        const data = {
+            id: id,
+            date: cells[0].textContent,
+            name: cells[1].textContent,
+            item: cells[2].textContent,
+            amount: cells[3].textContent.replace('₹', ''),
+            vendor_id: cells[4].textContent,
+            mode_of_transaction: cells[5].textContent,
+            transaction_id: cells[6].textContent
+        };
+
+        try {
+            const response = await fetch('/update_vendor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showMessage('💾 Purchase updated successfully!');
+            } else {
+                throw new Error('Update failed');
+            }
+        } catch (error) {
+            showMessage('❌ Failed to update purchase', true);
+        }
+    }
+
+    // Close popups when clicking overlay
+    document.getElementById('popupOverlay').addEventListener('click', function() {
+        closeVendorPopup();
+    });
+
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.sidebar');
+        const menuToggle = document.querySelector('.menu-toggle');
+        
+        if (window.innerWidth <= 768 && 
+            !sidebar.contains(event.target) && 
+            menuToggle && !menuToggle.contains(event.target)) {
+            sidebar.classList.remove('active');
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('vendorForm').addEventListener('submit', function(e) {
+        // Validate form before submitting
+        const form = this;
+        const formData = new FormData(form);
+        
+        // Check if required fields are filled
+        let hasErrors = false;
+        const requiredFields = ['date', 'name', 'item', 'amount', 'mode_of_transaction'];
+        
+        requiredFields.forEach(field => {
+            const value = formData.get(field);
+            if (!value || value.trim() === '') {
+                hasErrors = true;
+            }
+        });
+        
+        if (hasErrors) {
+            e.preventDefault();
+            showMessage('❌ Please fill in all required fields', true);
+            return false;
+        }
+        
+        // If validation passes, form will submit normally
+        showMessage('✅ Adding purchase...', false);
+    });
+
+    console.log('🏪 Vendor Details System Loaded');
+    </script>
+</body>
+</html>
